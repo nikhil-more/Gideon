@@ -1,7 +1,7 @@
 # Gideon
 An AI assistant
 
-##Timelines
+# Timelines
 
 April 20 - April 23
 1. SetUp a basic GUI to do face authentication
