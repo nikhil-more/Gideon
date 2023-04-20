@@ -3,7 +3,10 @@ An AI assistant
 
 # Timelines
 
-April 20 - April 23
+April 20
+1. Do necessary installation (1. For GUI, 2. Basic packages related to face authentication)
+
+April 21 - April 23
 1. SetUp a basic GUI to do face authentication
 
 April 24 - April 27
