@@ -1,0 +1,119 @@
+import sounddevice as sd
+import numpy as np
+import queue
+import threading
+from faster_whisper import WhisperModel
+
+# settings
+samplerate = 16000
+block_duration = 0.5 #seconds
+chunk_duration = 2 #seconds
+channels = 1
+
+frames_per_block = int(samplerate * block_duration)
+frames_per_chunk = int(samplerate * chunk_duration)
+
+audio_queue = queue.Queue()
+audio_buffer = []
+
+model = WhisperModel("small.en", device="cpu", compute_type="int8")
+
+def audio_callback(indata, frames, time, status):
+	if status:
+		print(status)
+	audio_queue.put(indata.copy())
+
+def recorder():
+	with sd.InputStream(
+			samplerate=samplerate,
+			channels=channels,
+			callback=audio_callback,
+			blocksize=frames_per_block):
+		print("Listening.... Press Ctrl+C to stop")
+		while True:
+			sd.sleep(100)
+
+def transcriber():
+	global audio_buffer
+	while True:
+		block = audio_queue.get()
+		audio_buffer.append(block)
+
+		total_frames = sum(len(b) for b in audio_buffer)
+		if total_frames >= frames_per_chunk:
+			audio_data = np.concatenate(audio_buffer)[:frames_per_chunk]
+			audio_buffer = [] #Clears the audio buffer
+
+			audio_data = audio_data.flatten().astype(np.float32)
+
+			# Transcription without timestamps
+			segments, _ = model.transcribe(
+					audio_data,
+					language="en",
+					beam_size=1 #Max Speed
+			)
+
+			for segment in segments:
+				print(segment.text) #Just printing, no timestamps
+
+# start threads for recording
+threading.Thread(target=recorder, daemon=True).start()
+transcriber()
+
+
+
+# from faster_whisper import WhisperModel
+# import sounddevice as sd
+# import wavio as wv
+#
+# import time
+#
+# # Sampling frequency
+# freq = 44100
+#
+# # Recording duration
+# duration = 5
+#
+# # print("Starting Recording....")
+# #
+# # # Start recorder with the given values
+# # # of duration and sample frequency
+# #
+# # # sd.default.device = 8#"Plantronics Blackwire 3220 Seri: USB Audio (hw:4,0), ALSA (2 in, 2 out)"
+# #
+# # recording = sd.rec(int(duration * freq),
+# #                    samplerate=freq, channels=2)
+# #
+# # # Record audio for the given number of seconds
+# # sd.wait()
+# #
+# # print("Audio Recorded...")
+# #
+# # # Convert the NumPy array to audio file
+# # wv.write("recording1.wav", recording, freq, sampwidth=2)
+# #
+# # print("Audio Saved...")
+#
+# start = time.time()
+#
+# model_size = "small.en"
+#
+# # Run on GPU with FP16
+# model = WhisperModel(model_size, device="cpu", compute_type="int8")
+#
+# # or run on GPU with INT8
+# # model = WhisperModel(model_size, device="cuda", compute_type="int8_float16")
+# # or run on CPU with INT8
+# # model = WhisperModel(model_size, device="cpu", compute_type="int8")
+#
+# segments, _ = model.transcribe("recording1.wav", language="en", beam_size=5)
+#
+# # print("Detected language '%s' with probability %f" % (info.language, info.language_probability))
+#
+# for segment in segments:
+#     print(segment.text)
+#     # print("[%.2fs -> %.2fs] %s" % (segment.start, segment.end, segment.text))
+#
+# end = time.time()
+#
+# print("Time Taken : ", end-start )

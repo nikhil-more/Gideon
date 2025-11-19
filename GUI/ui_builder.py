@@ -1,13 +1,6 @@
-import sys
-from datetime import datetime
-
 from PyQt6.QtWidgets import (
-    QApplication, QWidget, QLabel, QVBoxLayout, QHBoxLayout,
-    QFrame, QSizePolicy, QScrollArea, QSpacerItem
+    QWidget, QVBoxLayout, QHBoxLayout
 )
-from PyQt6.QtGui import QColor, QPalette
-from PyQt6.QtCore import Qt, QTimer
-
 from .title_window import TitleWindow
 from .conversation_window import ConversationWindow
 from .process_information_window import ProcessInformationWindow

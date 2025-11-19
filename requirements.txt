@@ -1,1 +1,15 @@
+pywhatkit
+playsound
+tts
+torch
+rich
+requests
+numpy
+sounddevice
+faster-whisper
+typing-extensions
+langchain-ollama
 pyqt6-sip~=13.10.2
+langchain-core~=0.3.76
+langchain~=0.3.25
+langgraph~=0.6.7
